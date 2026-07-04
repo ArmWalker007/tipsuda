@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
@@ -33,7 +33,620 @@
   </script>
   
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css">
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&family=Kanit:wght@300;400;500;600&display=swap');
+
+/* Color Variables */
+:root {
+  /* Dark Mode (Default) */
+  --bg-deep: #060212;
+  --bg-nebula: radial-gradient(circle at 50% 50%, #15092a 0%, #060212 100%);
+  --card-bg: rgba(18, 9, 36, 0.45);
+  --card-bg-hover: rgba(26, 13, 50, 0.65);
+  --card-border: rgba(168, 85, 247, 0.25);
+  --card-border-glow: rgba(217, 70, 239, 0.6);
+  --text-primary: #f3ebff;
+  --text-secondary: #c0b3df;
+  --accent-purple: #a855f7;
+  --accent-neon: #d946ef;
+  --accent-gold: #ffd875;
+  --accent-gold-rgb: 255, 216, 117;
+  --accent-purple-rgb: 168, 85, 247;
+  --glow-shadow: 0 0 20px rgba(168, 85, 247, 0.45);
+  --hud-line: rgba(168, 85, 247, 0.15);
+  
+  --font-hud: 'Orbitron', sans-serif;
+  --font-body: 'Outfit', 'Kanit', sans-serif;
+}
+
+:root.light {
+  /* Light Mode */
+  --bg-deep: #f6f3fc;
+  --bg-nebula: radial-gradient(circle at 50% 50%, #ffffff 0%, #ebe2ff 100%);
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-bg-hover: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(139, 92, 246, 0.2);
+  --card-border-glow: rgba(139, 92, 246, 0.5);
+  --text-primary: #170b30;
+  --text-secondary: #564a73;
+  --accent-purple: #7c3aed;
+  --accent-neon: #db2777;
+  --accent-gold: #c28800;
+  --accent-gold-rgb: 194, 136, 0;
+  --accent-purple-rgb: 124, 58, 237;
+  --glow-shadow: 0 0 15px rgba(124, 58, 237, 0.15);
+  --hud-line: rgba(124, 58, 237, 0.1);
+}
+
+/* Global Reset & Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  cursor: none; /* Hide default cursor to use custom cursor */
+}
+
+@media (max-width: 1024px) {
+  * {
+    cursor: auto; /* Fallback for touch devices */
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  background-image: var(--bg-nebula);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--accent-purple), var(--accent-neon));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-neon);
+}
+
+/* Background Canvas & Particles */
+#galaxy-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Custom Cursor Trail */
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent-neon);
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.15s, height 0.15s;
+  box-shadow: 0 0 10px var(--accent-neon), 0 0 20px var(--accent-neon);
+}
+
+.cursor-outline {
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid var(--accent-purple);
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease-out, border-color 0.3s ease;
+}
+
+.cursor-outline::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  background: var(--accent-gold);
+  transform: rotate(45deg);
+}
+
+/* Custom cursor interaction states */
+.cursor-hover .cursor-dot {
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent-gold);
+  box-shadow: 0 0 15px var(--accent-gold);
+}
+
+.cursor-hover .cursor-outline {
+  width: 50px;
+  height: 50px;
+  border-color: var(--accent-gold);
+  transform: translate(-50%, -50%) rotate(180deg);
+}
+
+/* Loading Screen */
+#loader-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #05020c;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), visibility 0.8s;
+}
+
+#loader-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.star-rail-loader {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.loader-orbit {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px dashed rgba(168, 85, 247, 0.3);
+  border-radius: 50%;
+  animation: spin 8s linear infinite;
+}
+
+.loader-planet {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  top: -8px;
+  left: calc(50% - 8px);
+  box-shadow: 0 0 15px var(--accent-gold);
+}
+
+.loader-center {
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
+  border: 2px solid var(--accent-purple);
+  transform: rotate(45deg);
+  animation: pulse-glow 2s infinite alternate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-center::before {
+  content: '◇';
+  color: var(--accent-gold);
+  font-size: 24px;
+  transform: rotate(-45deg);
+}
+
+/* Glassmorphism Cards */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.glass-panel:hover {
+  background: var(--card-bg-hover);
+  border-color: var(--card-border-glow);
+  box-shadow: var(--glow-shadow);
+}
+
+/* Star Rail UI Details */
+.sr-header-tag {
+  font-family: var(--font-hud);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sr-header-tag::before {
+  content: '◆';
+  font-size: 0.6rem;
+  color: var(--accent-gold);
+}
+
+.sr-title {
+  position: relative;
+  font-family: var(--font-hud);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sr-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-gold), transparent);
+}
+
+.sr-bracket {
+  position: relative;
+}
+.sr-bracket::before, .sr-bracket::after {
+  color: var(--accent-purple);
+  opacity: 0.7;
+  font-family: var(--font-hud);
+  font-weight: 300;
+}
+.sr-bracket::before { content: '[ '; }
+.sr-bracket::after { content: ' ]'; }
+
+/* Avatar Glowing Outer Ring */
+.avatar-ring-container {
+  position: relative;
+  padding: 12px;
+}
+
+.avatar-ring-outer {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed var(--accent-purple);
+  border-radius: 50%;
+  animation: spin 30s linear infinite;
+}
+
+.avatar-ring-inner {
+  position: absolute;
+  inset: 6px;
+  border: 2px solid transparent;
+  border-top-color: var(--accent-gold);
+  border-bottom-color: var(--accent-neon);
+  border-radius: 50%;
+  animation: spin 15s linear infinite reverse;
+}
+
+/* Parallax aurora layer */
+.purple-aurora {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, rgba(217, 70, 239, 0.05) 50%, transparent 100%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: float-slow 20s ease-in-out infinite alternate;
+}
+
+/* Star Rail Timeline */
+.timeline-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 16px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-purple) 0%, var(--accent-neon) 50%, transparent 100%);
+}
+
+@media (min-width: 768px) {
+  .timeline-line {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.timeline-diamond {
+  position: absolute;
+  top: 24px;
+  left: 7px;
+  width: 20px;
+  height: 20px;
+  background: var(--bg-deep);
+  border: 2px solid var(--accent-gold);
+  transform: rotate(45deg);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(var(--accent-gold-rgb), 0.5);
+}
+
+.timeline-diamond::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: var(--accent-neon);
+  transform: rotate(-45deg);
+  animation: pulse-glow 1.5s infinite alternate;
+}
+
+@media (min-width: 768px) {
+  .timeline-diamond {
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+  }
+}
+
+
+/* Skills Progress Ring styling */
+.skill-ring {
+  transform: rotate(-90deg);
+}
+
+.skill-ring-circle-bg {
+  fill: none;
+  stroke: rgba(168, 85, 247, 0.1);
+  stroke-width: 8;
+}
+
+.skill-ring-circle {
+  fill: none;
+  stroke: url(#skillGrad);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transition: stroke-dashoffset 1.5s cubic-bezier(0.1, 1, 0.1, 1);
+}
+
+.skill-ring-circle.active {
+  /* Offset is controlled via JS */
+}
+
+/* Neon Glow Buttons */
+.btn-neon {
+  position: relative;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--accent-purple);
+  padding: 0.75rem 2rem;
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.btn-neon::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(217, 70, 239, 0.2), transparent);
+  transition: all 0.5s ease;
+  z-index: -1;
+}
+
+.btn-neon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-purple);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: -2;
+}
+
+.btn-neon:hover {
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 15px var(--accent-purple), inset 0 0 8px rgba(168, 85, 247, 0.5);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.btn-neon:hover::before {
+  left: 100%;
+}
+
+.btn-neon:hover::after {
+  opacity: 0.15;
+}
+
+/* Secondary Golden Button */
+.btn-gold {
+  position: relative;
+  background: transparent;
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold);
+  padding: 0.75rem 2rem;
+  font-family: var(--font-hud);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.btn-gold:hover {
+  background: var(--accent-gold);
+  color: #0c061a;
+  box-shadow: 0 0 15px rgba(var(--accent-gold-rgb), 0.6);
+  transform: translateY(-2px);
+}
+
+/* Star Rail Corner Elements */
+.hud-corner {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--accent-gold);
+  pointer-events: none;
+}
+.hud-corner-tl { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+.hud-corner-tr { top: 6px; right: 6px; border-left: none; border-bottom: none; }
+.hud-corner-bl { bottom: 6px; left: 6px; border-right: none; border-top: none; }
+.hud-corner-br { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+
+/* Timeline Card Specific corner brackets */
+.sr-card-brackets {
+  position: absolute;
+  inset: 0;
+  border-left: 2px solid var(--accent-purple);
+  border-right: 2px solid var(--accent-purple);
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+.sr-card-brackets::before, .sr-card-brackets::after {
+  content: '';
+  position: absolute;
+  height: 2px;
+  width: 12px;
+  background: var(--accent-purple);
+}
+
+.sr-card-brackets::before { top: 0; left: 0; }
+.sr-card-brackets::after { bottom: 0; right: 0; }
+
+/* Custom Keyframe Animations */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(var(--accent-purple-rgb), 0.3);
+    opacity: 0.7;
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(var(--accent-purple-rgb), 0.8), 0 0 30px rgba(var(--accent-neon-rgb), 0.5);
+    opacity: 1;
+  }
+}
+
+@keyframes float-slow {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(-15px) rotate(3deg) scale(1.05); }
+  100% { transform: translateY(10px) rotate(-2deg) scale(0.95); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.star-blink {
+  animation: blink 3s ease-in-out infinite;
+}
+
+/* Typing Cursor Effect */
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  background: var(--accent-neon);
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+}
+
+/* Active Navigation Item Glow */
+.nav-link {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link::after {
+  content: '◆';
+  font-size: 0.4rem;
+  color: var(--accent-gold);
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  transition: transform 0.3s ease;
+  text-shadow: 0 0 5px var(--accent-gold);
+}
+
+.nav-link.active {
+  color: var(--accent-gold);
+}
+
+.nav-link.active::after {
+  transform: translateX(-50%) scale(1);
+}
+
+/* Chart Canvas wrapper */
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+/* Masonry / Grid Item Overlay hover */
+.gallery-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(12, 6, 26, 0.95) 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
+}
+
+.gallery-card:hover .gallery-overlay {
+  opacity: 1;
+}
+
+.gallery-img {
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.gallery-card:hover .gallery-img {
+  transform: scale(1.08);
+}
+
+</style>
 </head>
 <body class="relative min-h-screen text-white select-none">
 
@@ -882,7 +1495,623 @@
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   
   <!-- Custom JS -->
-  <script src="script.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Loader Screen Timer
+  const loader = document.getElementById('loader-screen');
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+    }, 1200); // Give enough time for Star Rail loading warp feel
+  });
+  
+  // Fallback in case load event takes too long
+  setTimeout(() => {
+    if (!loader.classList.contains('hidden')) {
+      loader.classList.add('hidden');
+    }
+  }, 3000);
+
+  // 2. Custom Cursor
+  const cursorDot = document.querySelector('.cursor-dot');
+  const cursorOutline = document.querySelector('.cursor-outline');
+
+  if (cursorDot && cursorOutline && window.innerWidth > 1024) {
+    let mouseX = 0;
+    let mouseY = 0;
+    let outlineX = 0;
+    let outlineY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    // Smooth cursor outline delay
+    const animateCursor = () => {
+      let distX = mouseX - outlineX;
+      let distY = mouseY - outlineY;
+      
+      outlineX += distX * 0.15;
+      outlineY += distY * 0.15;
+      
+      cursorOutline.style.left = outlineX + 'px';
+      cursorOutline.style.top = outlineY + 'px';
+      
+      requestAnimationFrame(animateCursor);
+    };
+    animateCursor();
+
+    // Hover effect on links, buttons and interactive elements
+    const hoverables = document.querySelectorAll('a, button, .interactive-card, .gallery-card, input, textarea, label');
+    hoverables.forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        document.body.classList.add('cursor-hover');
+      });
+      item.addEventListener('mouseleave', () => {
+        document.body.classList.remove('cursor-hover');
+      });
+    });
+  }
+
+  // 3. Canvas Starfield Background
+  const canvas = document.getElementById('galaxy-canvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let nebulae = [];
+    let shootingStars = [];
+    const starCount = 180;
+    const nebulaCount = 6;
+    const shootingStarCount = 2;
+    
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+      initNebulae();
+      initShootingStars();
+    };
+    
+    class Star {
+      constructor() {
+        this.reset();
+      }
+      
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 1.8 + 0.2;
+        this.alpha = Math.random();
+        this.twinkleSpeed = Math.random() * 0.015 + 0.005;
+        this.speedX = (Math.random() - 0.5) * 0.1;
+        this.speedY = (Math.random() - 0.5) * 0.1;
+      }
+      
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        
+        // Twinkle
+        this.alpha += this.twinkleSpeed;
+        if (this.alpha > 1 || this.alpha < 0.2) {
+          this.twinkleSpeed = -this.twinkleSpeed;
+        }
+        
+        // Boundary Check
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = '#fff';
+        
+        // Color hue variance (mostly white, some pale purple or light yellow)
+        const rand = Math.random();
+        if (rand > 0.85) {
+          ctx.fillStyle = '#ffe5a3'; // golden star
+        } else if (rand > 0.7) {
+          ctx.fillStyle = '#dbb9ff'; // purple star
+        }
+        
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    class CosmicNebula {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.radius = Math.random() * 250 + 150; // Larger nebulae
+        this.dx = (Math.random() - 0.5) * 0.04;
+        this.dy = (Math.random() - 0.5) * 0.04;
+        
+        // Richer cosmic colors (lavender, fuchsia, deep space indigo, cyan)
+        const colors = [
+          'rgba(168, 85, 247, 0.05)', // Purple
+          'rgba(217, 70, 239, 0.04)', // Fuchsia
+          'rgba(6, 182, 212, 0.04)',  // Cyan
+          'rgba(99, 102, 241, 0.04)'  // Indigo
+        ];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+      
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        
+        if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) this.dx = -this.dx;
+        if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) this.dy = -this.dy;
+      }
+      
+      draw() {
+        ctx.save();
+        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+        grad.addColorStop(0, this.color);
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    class ShootingStar {
+      constructor() {
+        this.reset();
+      }
+      
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height * 0.4; // Start in top portion
+        this.length = Math.random() * 80 + 40;
+        this.speed = Math.random() * 4 + 2;
+        this.angle = Math.PI / 6 + Math.random() * (Math.PI / 12); // Diagonal drop down-right
+        this.alpha = 1;
+        this.opacitySpeed = Math.random() * 0.015 + 0.005;
+      }
+      
+      update() {
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+        this.alpha -= this.opacitySpeed;
+        
+        if (this.alpha <= 0 || this.x > canvas.width || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      
+      draw() {
+        if (this.alpha <= 0) return;
+        
+        ctx.save();
+        const startX = this.x;
+        const startY = this.y;
+        const endX = this.x - Math.cos(this.angle) * this.length;
+        const endY = this.y - Math.sin(this.angle) * this.length;
+        
+        const grad = ctx.createLinearGradient(startX, startY, endX, endY);
+        grad.addColorStop(0, `rgba(255, 216, 117, ${this.alpha})`); // Golden shooting head
+        grad.addColorStop(0.5, `rgba(217, 70, 239, ${this.alpha * 0.6})`); // Purple middle
+        grad.addColorStop(1, 'transparent');
+        
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+    
+    const initStars = () => {
+      stars = [];
+      for (let i = 0; i < starCount; i++) {
+        stars.push(new Star());
+      }
+    };
+    
+    const initNebulae = () => {
+      nebulae = [];
+      for (let i = 0; i < nebulaCount; i++) {
+        nebulae.push(new CosmicNebula());
+      }
+    };
+
+    const initShootingStars = () => {
+      shootingStars = [];
+      for (let i = 0; i < shootingStarCount; i++) {
+        shootingStars.push(new ShootingStar());
+      }
+    };
+    
+    const loop = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      nebulae.forEach(nebula => {
+        nebula.update();
+        nebula.draw();
+      });
+      
+      stars.forEach(star => {
+        star.update();
+        star.draw();
+      });
+
+      shootingStars.forEach(sStar => {
+        sStar.update();
+        sStar.draw();
+      });
+      
+      requestAnimationFrame(loop);
+    };
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    loop();
+  }
+
+  // 4. Dark & Light Mode Toggle
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = themeToggle ? themeToggle.querySelector('i') : null;
+  
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  if (savedTheme === 'light') {
+    document.documentElement.classList.add('light');
+    if (themeIcon) {
+      themeIcon.className = 'fa-solid fa-moon';
+    }
+  } else {
+    document.documentElement.classList.remove('light');
+    if (themeIcon) {
+      themeIcon.className = 'fa-solid fa-sun';
+    }
+  }
+  
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('light');
+      const isLight = document.documentElement.classList.contains('light');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      
+      if (themeIcon) {
+        themeIcon.className = isLight ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+      }
+      
+      // Update chart fonts and colors if toggle occurs
+      updateChartTheme();
+    });
+  }
+
+  // 5. Typing Subtext Effect
+  const words = ["Creative Design Student", "Dream • Create • Inspire"];
+  let wordIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  const typeTextElement = document.getElementById('type-text');
+
+  const typeEffect = () => {
+    if (!typeTextElement) return;
+    
+    const currentWord = words[wordIndex];
+    
+    if (isDeleting) {
+      typeTextElement.textContent = currentWord.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      typeTextElement.textContent = currentWord.substring(0, charIndex + 1);
+      charIndex++;
+    }
+    
+    let typingSpeed = isDeleting ? 40 : 80;
+    
+    if (!isDeleting && charIndex === currentWord.length) {
+      typingSpeed = 2000; // Pause at end of word
+      isDeleting = true;
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      wordIndex = (wordIndex + 1) % words.length;
+      typingSpeed = 500; // Pause before starting new word
+    }
+    
+    setTimeout(typeEffect, typingSpeed);
+  };
+  
+  if (typeTextElement) {
+    typeEffect();
+  }
+
+  // 6. Navigation Link Active Tracking on Scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  
+  const handleScroll = () => {
+    const scrollPos = window.scrollY + 120;
+    
+    sections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      const id = section.getAttribute('id');
+      
+      if (scrollPos >= top && scrollPos < top + height) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${id}`) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+
+    // Floating Navbar Glassmorphism scroll style
+    const navbar = document.getElementById('main-navbar');
+    if (navbar) {
+      if (window.scrollY > 50) {
+        navbar.classList.add('py-3', 'shadow-2xl');
+        navbar.classList.remove('py-5');
+      } else {
+        navbar.classList.remove('py-3', 'shadow-2xl');
+        navbar.classList.add('py-5');
+      }
+    }
+  };
+  
+  window.addEventListener('scroll', handleScroll);
+  handleScroll();
+
+  // 7. Interactive Skills SVG Progress Circles (Observer)
+  const skillsSection = document.getElementById('skills');
+  const skillCircles = document.querySelectorAll('.skill-ring-circle');
+  
+  const animateSkills = () => {
+    skillCircles.forEach(circle => {
+      const percent = parseInt(circle.getAttribute('data-percent'));
+      // Formula: Dashoffset = Total Length - (Percent / 100 * Total Length)
+      // SVG circle radius is 45, perimeter is 2 * PI * 45 = 282.7 (approx 283)
+      const offset = 283 - (percent / 100 * 283);
+      circle.style.strokeDashoffset = offset;
+    });
+  };
+
+  if (skillsSection && skillCircles.length > 0) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          animateSkills();
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    
+    observer.observe(skillsSection);
+  }
+
+  // 8. Academic Performance Chart (Chart.js)
+  const chartCanvas = document.getElementById('academic-chart');
+  let academicChart = null;
+
+  const getChartColors = () => {
+    const isLight = document.documentElement.classList.contains('light');
+    return {
+      gridColor: isLight ? 'rgba(124, 58, 237, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+      angleLinesColor: isLight ? 'rgba(124, 58, 237, 0.2)' : 'rgba(255, 216, 117, 0.25)',
+      pointLabelColor: isLight ? '#170b30' : '#d0c4ff',
+      textColor: isLight ? '#564a73' : '#bfa5e6',
+      fillColor: isLight ? 'rgba(124, 58, 237, 0.25)' : 'rgba(168, 85, 247, 0.2)',
+      strokeColor: isLight ? 'rgba(124, 58, 237, 0.8)' : 'rgba(217, 70, 239, 0.85)',
+      pointBorderColor: isLight ? '#ffd875' : '#ffd875',
+      pointBackgroundColor: isLight ? '#7c3aed' : '#a855f7'
+    };
+  };
+
+  const initAcademicChart = () => {
+    if (!chartCanvas) return;
+    
+    const colors = getChartColors();
+    
+    const data = {
+      labels: [
+        'Graphic Design', 
+        'Digital Art & Media', 
+        'Theory of Creative Art', 
+        'Design Presentation', 
+        'Creative Idea Generation', 
+        'Photography Skill'
+      ],
+      datasets: [{
+        label: 'Creative Performance (GPA Mapping)',
+        data: [3.80, 3.75, 3.60, 3.50, 3.85, 3.40], // Mapped Design Area Scores based on GPA ratios
+        backgroundColor: colors.fillColor,
+        borderColor: colors.strokeColor,
+        borderWidth: 2,
+        pointBackgroundColor: colors.pointBackgroundColor,
+        pointBorderColor: colors.pointBorderColor,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: colors.strokeColor,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    };
+
+    const config = {
+      type: 'radar',
+      data: data,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(9, 5, 20, 0.85)',
+            titleColor: '#ffd875',
+            bodyColor: '#f3ebff',
+            borderColor: 'rgba(168, 85, 247, 0.4)',
+            borderWidth: 1,
+            titleFont: {
+              family: 'Orbitron',
+              size: 13
+            },
+            bodyFont: {
+              family: 'Outfit',
+              size: 13
+            },
+            callbacks: {
+              label: function(context) {
+                return ` Performance Index: ${context.formattedValue} / 4.00`;
+              }
+            }
+          }
+        },
+        scales: {
+          r: {
+            angleLines: {
+              color: colors.angleLinesColor
+            },
+            grid: {
+              color: colors.gridColor
+            },
+            pointLabels: {
+              color: colors.pointLabelColor,
+              font: {
+                family: 'Outfit, Kanit',
+                size: 11,
+                weight: '500'
+              }
+            },
+            ticks: {
+              color: colors.textColor,
+              backdropColor: 'transparent',
+              font: {
+                family: 'Orbitron',
+                size: 10
+              },
+              stepSize: 1.0,
+              min: 0,
+              max: 4.0
+            }
+          }
+        }
+      }
+    };
+
+    academicChart = new Chart(chartCanvas, config);
+  };
+
+  const updateChartTheme = () => {
+    if (!academicChart) return;
+    const colors = getChartColors();
+    
+    academicChart.options.scales.r.angleLines.color = colors.angleLinesColor;
+    academicChart.options.scales.r.grid.color = colors.gridColor;
+    academicChart.options.scales.r.pointLabels.color = colors.pointLabelColor;
+    academicChart.options.scales.r.ticks.color = colors.textColor;
+    
+    academicChart.data.datasets[0].backgroundColor = colors.fillColor;
+    academicChart.data.datasets[0].borderColor = colors.strokeColor;
+    academicChart.data.datasets[0].pointBackgroundColor = colors.pointBackgroundColor;
+    academicChart.data.datasets[0].pointBorderColor = colors.pointBorderColor;
+    
+    academicChart.update();
+  };
+
+  // Switch between radar skill stat web and semester GPAs
+  const viewRadarBtn = document.getElementById('view-radar-btn');
+  const viewGpaBtn = document.getElementById('view-gpa-btn');
+  const radarContainer = document.getElementById('radar-chart-container');
+  const gpaContainer = document.getElementById('gpa-bars-container');
+
+  if (viewRadarBtn && viewGpaBtn && radarContainer && gpaContainer) {
+    viewRadarBtn.addEventListener('click', () => {
+      radarContainer.classList.remove('hidden');
+      gpaContainer.classList.add('hidden');
+      viewRadarBtn.className = 'btn-neon text-xs px-4 py-2';
+      viewGpaBtn.className = 'btn-gold text-xs px-4 py-2 opacity-50 hover:opacity-100';
+    });
+
+    viewGpaBtn.addEventListener('click', () => {
+      radarContainer.classList.add('hidden');
+      gpaContainer.classList.remove('hidden');
+      viewGpaBtn.className = 'btn-gold text-xs px-4 py-2';
+      viewRadarBtn.className = 'btn-neon text-xs px-4 py-2 opacity-50 hover:opacity-100';
+      
+      // Animate Bar indicators inside GPA container
+      setTimeout(() => {
+        const barWidths = document.querySelectorAll('.gpa-bar-fill');
+        barWidths.forEach(bar => {
+          const val = bar.getAttribute('data-value');
+          // Map grade 0-4.00 to percentage 0-100%
+          const pct = (parseFloat(val) / 4.00) * 100;
+          bar.style.width = pct + '%';
+        });
+      }, 100);
+    });
+  }
+
+  // Initialize the chart
+  initAcademicChart();
+
+  // 9. Gallery Filtering Logic
+  const filterBtns = document.querySelectorAll('.gallery-filter-btn');
+  const galleryItems = document.querySelectorAll('.gallery-item');
+  
+  if (filterBtns.length > 0 && galleryItems.length > 0) {
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Update active buttons styling
+        filterBtns.forEach(b => {
+          b.classList.remove('active', 'border-opacity-100', 'text-yellow-400');
+          b.classList.add('opacity-60');
+        });
+        btn.classList.add('active', 'text-yellow-400');
+        btn.classList.remove('opacity-60');
+        
+        const filterValue = btn.getAttribute('data-filter');
+        
+        galleryItems.forEach(item => {
+          if (filterValue === 'all') {
+            item.style.display = 'block';
+            setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'scale(1)'; }, 50);
+          } else {
+            const categories = item.getAttribute('data-category').split(' ');
+            if (categories.includes(filterValue)) {
+              item.style.display = 'block';
+              setTimeout(() => { item.style.opacity = '1'; item.style.transform = 'scale(1)'; }, 50);
+            } else {
+              item.style.opacity = '0';
+              item.style.transform = 'scale(0.8)';
+              setTimeout(() => { item.style.display = 'none'; }, 300);
+            }
+          }
+        });
+      });
+    });
+  }
+
+  // 10. AOS Animation trigger setup
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-out-cubic',
+      once: true,
+      mirror: false,
+      anchorPlacement: 'top-bottom'
+    });
+  }
+});
+
+</script>
   <script>
     // Extra window scroll tracker for navbar scrollbar indicator
     window.addEventListener('scroll', () => {
